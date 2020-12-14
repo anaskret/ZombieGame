@@ -6,6 +6,11 @@ TagManager:
   tags:
   - SpittingEnemy
   - BasicEnemy
+  - Coin
+  - Boomer
+  - TrailEnemy
+  - Wall
+  - Bullet
   layers:
   - Default
   - TransparentFX

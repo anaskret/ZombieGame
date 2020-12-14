@@ -1,12 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     //movement
     [SerializeField] private float speed;
     Rigidbody2D newRigidbody;
+
+    //UI
+    [SerializeField] private GameObject healthBarUi;
+    [SerializeField] private Slider slider;
+    [SerializeField] private Text numberOfCoins;
+    [SerializeField] private GameObject pistol;
+    [SerializeField] private GameObject shotgun;
+    [SerializeField] private GameObject rifle;
+
 
 
     //shooting
@@ -15,16 +25,23 @@ public class PlayerController : MonoBehaviour
     private float lastFire;
     private float currentCooldown = 1;
 
+    [SerializeField] private GameObject grenadePrefab;
+
     private bool dpadInput = false;
 
     void Start()
     {
         newRigidbody = GetComponent<Rigidbody2D>();
+
+        slider.value = PlayerModel.CalculateHealth();
     }
 
     private void FixedUpdate()
     {
-        if(PlayerModel.Health == 0)
+        slider.value = PlayerModel.CalculateHealth();
+        numberOfCoins.text = PlayerModel.Coins.ToString();
+
+        if (PlayerModel.Health == 0)
         {
             PlayerModel.ReloadCheckpoint(gameObject);
         }
@@ -43,33 +60,39 @@ public class PlayerController : MonoBehaviour
         float shootHorizontal = Input.GetAxis("ShootHorizontal");
         float shootVertical = Input.GetAxis("ShootVertical");
 
-        switch((int)PlayerModel.SelectedWeapon)
-        {
-            case 0: currentCooldown = Pistol.Cooldown;
-                break;
-            case 1: currentCooldown = Shotgun.Cooldown;
-                break;
-            case 2: currentCooldown = Rifle.Cooldown;
-                break;
-        }
+        var weapon = PlayerModel.SwitchWeapon((int)PlayerModel.SelectedWeapon);
+        currentCooldown = weapon.GetWeaponCooldown();
 
         if (CanShoot(shootVertical, shootHorizontal) && Time.time > lastFire + currentCooldown)
         {
-            switch ((int)PlayerModel.SelectedWeapon)
-            {
-                case 0:
-                    Pistol.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
-                    break;
-                case 1:
-                    Shotgun.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
-                    break;
-                case 2:
-                    Rifle.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
-                    break;
-            }
+            weapon.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
             
             lastFire = Time.time;
         }
+    }
+
+    public void InitiateGrenadeThrow()
+    {
+        if (PlayerModel.AvailableGrenades <= 0)
+            return;
+
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        var grenade = Instantiate(grenadePrefab, transform.position, transform.rotation);
+
+        var grenadeController = grenade.GetComponent<GrenadeController>();
+        grenadeController.ThrowGrenade(horizontal, vertical);
+
+        PlayerModel.ChangeNumberOfGrenades(-1);
+    }
+
+    public void UseFirstAidKit()
+    {
+        if (PlayerModel.AvailableFirstAidKits <= 0)
+            return;
+
+        PlayerModel.ChangeHealth(PlayerModel.FirstAidKitRegeneration);
     }
 
     public void WeaponSelect()
@@ -85,11 +108,13 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(DpadControl(false));
             PlayerModel.ChangeWeapon(-1);
+            CurrentWeapon();
         }
         else if(dpadX == 1f && dpadInput)
         {
             StartCoroutine(DpadControl(true));
             PlayerModel.ChangeWeapon(1);
+            CurrentWeapon();
         }
     }
 
@@ -101,6 +126,22 @@ public class PlayerController : MonoBehaviour
         return true;
     }
 
+    private void CurrentWeapon()
+    {
+        switch ((int)PlayerModel.SelectedWeapon)
+        {
+            case 0:
+                StartCoroutine(ShowCurrentWeapon(pistol));
+                break;
+            case 1:
+                StartCoroutine(ShowCurrentWeapon(shotgun));
+                break;
+            case 2:
+                StartCoroutine(ShowCurrentWeapon(rifle));
+                break;
+        }
+    }
+
     IEnumerator DpadControl(bool input)
     {
         dpadInput = false;
@@ -109,5 +150,14 @@ public class PlayerController : MonoBehaviour
         if (input == true) PlayerModel.ChangeWeapon(1);  
 
         StopCoroutine(nameof(DpadControl));
+    }
+
+    IEnumerator ShowCurrentWeapon(GameObject weapon)
+    {
+        weapon.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        weapon.SetActive(false);
+
+        StopCoroutine(nameof(ShowCurrentWeapon));
     }
 }

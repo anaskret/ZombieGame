@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AcidVatController : MonoBehaviour
+public class SmallAcidController : MonoBehaviour
 {
     public float lifeTime;
 
@@ -18,10 +18,6 @@ public class AcidVatController : MonoBehaviour
         {
             PlayerModel.ChangeHealth(-0.5f);
         }
-        /*if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Door"))
-        {
-            Destroy(gameObject);
-        }*/
     }
 
     IEnumerator DeathDelay()

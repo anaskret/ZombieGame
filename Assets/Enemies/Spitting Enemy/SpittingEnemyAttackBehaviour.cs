@@ -15,7 +15,7 @@ public class SpittingEnemyAttackBehaviour : StateMachineBehaviour
     {
         var enemy = animator.gameObject.GetComponent<SpittingEnemyAi>();
         enemy.MoveToCurrentTarget();
-        enemy.Shoot();
+        enemy.AttackPlayer();
     }
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state

@@ -24,6 +24,16 @@ public class PlayerBulletController : MonoBehaviour
             collision.GetComponent<SpittingEnemyAi>().ChangeEnemyHealth(-PlayerModel.Damage);
             Destroy(gameObject);
         }
+        if (collision.gameObject.CompareTag("Boomer"))
+        {
+            collision.GetComponent<BoomerAi>().ChangeEnemyHealth(-PlayerModel.Damage);
+            Destroy(gameObject);
+        }
+        if (collision.gameObject.CompareTag("TrailEnemy"))
+        {
+            collision.GetComponent<TrailEnemyAi>().ChangeEnemyHealth(-PlayerModel.Damage);
+            Destroy(gameObject);
+        }
     }
     IEnumerator DeathDelay()
     {

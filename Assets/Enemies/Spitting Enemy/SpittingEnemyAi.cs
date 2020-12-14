@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class SpittingEnemyAi : EnemyModel
 {
-    [SerializeField] private float currentDistance;
     [SerializeField] private GameObject bulletPrefab;
     private float lastFire;
     [SerializeField] private float fireDelay;
-    [SerializeField] private float enemySpeed;
 
     [SerializeField] private GameObject p1;
     [SerializeField] private GameObject p2;
@@ -19,10 +17,9 @@ public class SpittingEnemyAi : EnemyModel
     private Transform pointB;
     private int currentTarget;
 
-    private void Awake()
+    protected override void Awake()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        myAnimator = GetComponent<Animator>();
+        base.Awake();
         pointA = p1.transform;
         pointB = p2.transform;
         waypoints = new Transform[2]
@@ -31,16 +28,7 @@ public class SpittingEnemyAi : EnemyModel
             pointB
         };
         currentTarget = 1;
-
-        Health = 6;
-    }
-
-    void FixedUpdate()
-    {
-        IsDead();
-
-        currentDistance = player.transform.position.x - transform.position.x;
-        myAnimator.SetFloat("distanceFromPlayer", currentDistance);
+        debugg = true;
     }
 
     public void SetNextPoint()
@@ -59,18 +47,18 @@ public class SpittingEnemyAi : EnemyModel
     public void MoveToCurrentTarget()
     {
         var dif = waypoints[currentTarget].position - transform.position;
-        transform.position += dif.normalized * Time.deltaTime * enemySpeed;
+        transform.position += dif.normalized * Time.deltaTime * speed;
         if (dif.magnitude < 0.3)
         {
             SetNextPoint();
         }
     }
 
-    public void Shoot()
+    public override void AttackPlayer()
     {
         if (Time.time > lastFire + fireDelay)
         {
-            _ = Instantiate(bulletPrefab, transform.position, transform.rotation) as GameObject;
+            _ = Instantiate(bulletPrefab, transform.position, transform.rotation);
             lastFire = Time.time;
         }
     }
