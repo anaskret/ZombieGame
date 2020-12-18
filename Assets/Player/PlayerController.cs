@@ -8,14 +8,18 @@ public class PlayerController : MonoBehaviour
     //movement
     [SerializeField] private float speed;
     Rigidbody2D newRigidbody;
+    Animator myAnimator;
 
     //UI
     [SerializeField] private GameObject healthBarUi;
     [SerializeField] private Slider slider;
     [SerializeField] private Text numberOfCoins;
+    [SerializeField] private Text numberOfFirstAidKits;
+    [SerializeField] private Text numberOfGrenades;
     [SerializeField] private GameObject pistol;
     [SerializeField] private GameObject shotgun;
     [SerializeField] private GameObject rifle;
+    [SerializeField] private GameObject assaultRifle;
 
 
 
@@ -32,6 +36,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         newRigidbody = GetComponent<Rigidbody2D>();
+        myAnimator = gameObject.GetComponent<Animator>();
 
         slider.value = PlayerModel.CalculateHealth();
     }
@@ -40,8 +45,10 @@ public class PlayerController : MonoBehaviour
     {
         slider.value = PlayerModel.CalculateHealth();
         numberOfCoins.text = PlayerModel.Coins.ToString();
+        numberOfFirstAidKits.text = PlayerModel.AvailableFirstAidKits.ToString();
+        numberOfGrenades.text = PlayerModel.AvailableGrenades.ToString();
 
-        if (PlayerModel.Health == 0)
+        if (PlayerModel.Health <= 0)
         {
             PlayerModel.ReloadCheckpoint(gameObject);
         }
@@ -139,6 +146,9 @@ public class PlayerController : MonoBehaviour
             case 2:
                 StartCoroutine(ShowCurrentWeapon(rifle));
                 break;
+            case 3:
+                StartCoroutine(ShowCurrentWeapon(assaultRifle));
+                break;
         }
     }
 
@@ -159,5 +169,10 @@ public class PlayerController : MonoBehaviour
         weapon.SetActive(false);
 
         StopCoroutine(nameof(ShowCurrentWeapon));
+    }
+
+    public void IsTalking(bool isTalking)
+    {
+        myAnimator.SetBool("isTalking", isTalking);
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SpittingEnemyAi : EnemyModel
-{
+{ 
     [SerializeField] private GameObject bulletPrefab;
     private float lastFire;
     [SerializeField] private float fireDelay;

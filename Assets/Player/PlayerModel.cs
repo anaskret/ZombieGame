@@ -4,30 +4,45 @@ using UnityEngine;
 
 public static class PlayerModel
 {
+    //Health
     public static float Health { get; private set; } = 10;
     public static float MaxHealth { get; private set; } = 10;
+
+    //cooldown after which player can receive damage
     public static float DamageCooldown { get; private set; } = 0;
 
+    //Weapons and their damage
     public static Weapons SelectedWeapon { get; private set; } = Weapons.Pistol;
     public static float Damage { get; private set; } = 1;
 
+    //save checkpoint
     public static GameObject CurrentCheckpoint { get; private set; }
     
-    public static int Coins { get; private set; } = 0;
+    //players coins
+    public static int Coins { get; private set; } = 30;
 
+    //grenades
     public static int AvailableGrenades { get; private set; } = 1;
 
+    //first aid kits
     public static int AvailableFirstAidKits { get; private set; } = 1;
     public static float FirstAidKitRegeneration{ get; private set; } = 2;
 
-    public static List<string> ActiveQuests { get; private set; }
-    public static List<string> CompletedQuests { get; private set; }
+    //quests
+    public static List<string> ActiveQuests { get; private set; } = new List<string>();
+    public static List<string> CompletedQuests { get; private set; } = new List<string>();
 
+    //weapon changing
     private static int weaponIndex = 0;
     private static bool skip = true;
+
+    //weapon cooldown
     private static readonly float damageRate = 3;
 
+    //saves state of the players health and inventory when he reached the checkpoint
     private static float healthOnCheckpoint = 5;
+    private static int grenadesOnCheckpoint = 1;
+    private static int firstAidKitsOnCheckpoint = 1;
     public enum Weapons
     {
         Pistol = 0,
@@ -48,8 +63,8 @@ public static class PlayerModel
             Health += change;
             SetDamageCooldown();
         }
-        else if(change > 0 && AvailableFirstAidKits > 0)
-        {
+        else if((change > 0 && AvailableFirstAidKits > 0) && Health < MaxHealth)
+        { 
             Health += change;
             ChangeNumberOfFirstAidKits(-1);
             Debug.Log($"Player Health: {Health}");
@@ -73,9 +88,9 @@ public static class PlayerModel
 
         if (weaponIndex < 0)
         {
-            weaponIndex = 2;
+            weaponIndex = 3;
         }
-        else if (weaponIndex > 2) //domyslnie 3
+        else if (weaponIndex > 3) //domyslnie 3
         {
             weaponIndex = 0;
         }
@@ -83,13 +98,14 @@ public static class PlayerModel
 
         var weapon = SwitchWeapon(weaponIndex);
 
-        if(weapon.IsWeaponAvailable())
+        if (weapon.IsWeaponAvailable())
         {
             Damage = weapon.GetWeaponDamage();
         }
         else
         {
-            ChangeWeapon(1);
+            skip = true;
+            ChangeWeapon(i);
         }
     }
     
@@ -110,6 +126,10 @@ public static class PlayerModel
                 Rifle rifle = weaponInstance.AddComponent<Rifle>();
                 SelectedWeapon = Weapons.Rifle;
                 return rifle;
+            case 3:
+                AssaultRifle ar = weaponInstance.AddComponent<AssaultRifle>();
+                SelectedWeapon = Weapons.AssaultRifle;
+                return ar;
             default:
                 Pistol defaultPistol = weaponInstance.AddComponent<Pistol>();
                 SelectedWeapon = Weapons.Pistol;
@@ -121,12 +141,16 @@ public static class PlayerModel
     {
         CurrentCheckpoint = checkpoint;
         healthOnCheckpoint = Health;
+        grenadesOnCheckpoint = AvailableGrenades;
+        firstAidKitsOnCheckpoint = AvailableFirstAidKits;
     }
 
     public static void ReloadCheckpoint(GameObject player)
     {
         player.transform.position = CurrentCheckpoint.transform.position;
         Health = healthOnCheckpoint;
+        AvailableGrenades = grenadesOnCheckpoint;
+        AvailableFirstAidKits = firstAidKitsOnCheckpoint;
     }
 
     public static void ChangeNumberOfCoins(int value)

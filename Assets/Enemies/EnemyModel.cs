@@ -99,7 +99,6 @@ public class EnemyModel : MonoBehaviour
     public virtual void ChangeEnemyHealth(float change)
     {
         Health += change;
-        Debug.Log($"Enemy Health: {Health}");
     }
 
     private float CalculateHealth()

@@ -10,4 +10,5 @@ public interface IWeapon
     float GetWeaponSpeed();
     float GetWeaponCooldown();
     float GetWeaponDamage();
+    void Reload();
 }

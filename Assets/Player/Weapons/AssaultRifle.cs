@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Rifle : MonoBehaviour, IWeapon
+public class AssaultRifle : MonoBehaviour, IWeapon
 {
-    public static float Speed { get; private set; } = 10;
-    public static float Cooldown { get; private set; } = 2f;
-    public static float ReloadCooldown { get; private set; } = 3f;
-    public static float Damage { get; private set; } = 2;
+    public static float Speed { get; private set; } = 5;
+    public static float Cooldown { get; private set; } = 0.25f;
+    public static float ReloadCooldown { get; private set; } = 2f;
+    public static float Damage { get; private set; } = 0.3f;
     public static bool IsAvailable { get; private set; } = false;
-    public static int Ammo { get; private set; } = 10;
+    public static int Ammo { get; private set; } = 30;
 
     private static readonly int startAmmo = Ammo;
     public void Unlock()
@@ -27,11 +27,13 @@ public class Rifle : MonoBehaviour, IWeapon
         {
             Ammo--;
         }
+        float randomY = Random.Range(-0.2f, 0.2f);
+        float randomX = Random.Range(-0.2f, 0.2f);
         var bullet = Instantiate(bulletPrefab, transform.position, transform.rotation) as GameObject;
         bullet.GetComponent<Rigidbody2D>().gravityScale = 0;
         bullet.GetComponent<Rigidbody2D>().velocity = new Vector3(
-            x * Speed,
-            y * Speed,
+            (x + randomX) * Speed,
+            (y + randomY) * Speed,
             0);
     }
 

@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Shotgun : MonoBehaviour, IWeapon
 {
-    public float Speed { get; private set; } = 5;
-    public float Cooldown { get; private set; } = 2;
-    public float Damage { get; private set; } = 1;
-    public bool IsAvailable { get; private set; } = true;
+    public static float Speed { get; private set; } = 5;
+    public static float Cooldown { get; private set; } = 1f;
+    public static float ReloadCooldown { get; private set; } = 2f;
+    public static float Damage { get; private set; } = 0.5f;
+    public static bool IsAvailable { get; private set; } = true;
+    public static int Ammo { get; private set; } = 8;
 
+    private static readonly int startAmmo = Ammo;
     public void Unlock()
     {
         IsAvailable = true;
@@ -16,6 +19,14 @@ public class Shotgun : MonoBehaviour, IWeapon
 
     public void Shoot(GameObject bulletPrefab, Transform transform, float x, float y)
     {
+        if (Ammo <= 0)
+        {
+            Reload();
+        }
+        else
+        {
+            Ammo--;
+        }
         var bullet = Instantiate(bulletPrefab, transform.position, transform.rotation) as GameObject;
         bullet.GetComponent<Rigidbody2D>().gravityScale = 0;
         bullet.GetComponent<Rigidbody2D>().velocity = new Vector3(
@@ -50,11 +61,19 @@ public class Shotgun : MonoBehaviour, IWeapon
 
     public float GetWeaponCooldown()
     {
+        if (Ammo <= 0)
+            return ReloadCooldown;
+
         return Cooldown;
     }
 
     public float GetWeaponDamage()
     {
         return Damage;
+    }
+
+    public void Reload()
+    {
+        Ammo = startAmmo;
     }
 }

@@ -6,12 +6,17 @@ using UnityEngine.UI;
 public class NpcController : MonoBehaviour
 {
     [SerializeField] private string[] dialogTextArray;
+    [SerializeField] private string[] questAcceptedTextArray;
+    [SerializeField] private string[] questCompletedTextArray;
     [SerializeField] private Text text;
     [SerializeField] private GameObject background;
     private Animator myAnimator;
     private GameObject player;
 
-    public readonly bool givesQuest;
+    public bool givesQuest;
+
+    public bool questAccepted = false;
+    public bool questCompleted = false;
 
     private float currentDistance;
     private int index = 0;
@@ -42,7 +47,18 @@ public class NpcController : MonoBehaviour
         text.enabled = true;
         background.SetActive(true);
 
-        text.text = dialogTextArray[index];
+        if (questAccepted && !questCompleted)
+        {
+            text.text = questAcceptedTextArray[index];
+        }
+        else if (questCompleted)
+        {
+            text.text = questCompletedTextArray[index];
+        }
+        else
+        {
+            text.text = dialogTextArray[index];
+        }
     }
 
     public void IncrementIndex()
@@ -52,9 +68,12 @@ public class NpcController : MonoBehaviour
             index++;
         }
 
-        if(index >= dialogTextArray.Length)
+        if((index >= dialogTextArray.Length && !givesQuest || !questAccepted)
+           || (index >= questAcceptedTextArray.Length && (questAccepted && !questCompleted))
+           || (index >= questCompletedTextArray.Length && (questCompleted)))
         {
-            TalkingExit(false);
+            HideTextField();
+            isDialogOver = true;
             //finish dialog
         }
     }
@@ -67,23 +86,28 @@ public class NpcController : MonoBehaviour
         }
         else if(Input.GetKeyDown("joystick button 0") && index == dialogTextArray.Length)
         {
-            TalkingExit(false);
-            //accept quest
+            //quest accepted
+            HideTextField();
+            questAccepted = true;
+            gameObject.GetComponent<QuestController>().QuestAccepted();
         }
         else if(Input.GetKeyDown("joystick button 1") && index == dialogTextArray.Length)
         {
-            TalkingExit(false);
-            //decline quest
+            //quest declined
+            HideTextField();
         }
     }
 
-    public void TalkingExit(bool resetIndex)
+    public void HideTextField()
     {
         text.enabled = false;
         background.SetActive(false);
-        isDialogOver = false;
 
-        if(resetIndex)
-            index = 0;
+    }
+
+    public void ResetText()
+    { 
+        isDialogOver = false;
+        index = 0; 
     }
 }
