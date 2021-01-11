@@ -37,10 +37,10 @@ public class SpitBulletController : MonoBehaviour
             PlayerModel.ChangeHealth(-0.5f);
             CreateVatOfAcid();
         }
-        /*if (collision.gameObject.CompareTag("Wall") || collision.gameObject.CompareTag("Door"))
+        if (collision.gameObject.CompareTag("Wall"))
         {
             Destroy(gameObject);
-        }*/
+        }
     }
 
     private void BulletMovement()

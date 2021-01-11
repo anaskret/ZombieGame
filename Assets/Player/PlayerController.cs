@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using LitJson;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, ISaveable
 {
     //movement
     [SerializeField] private float speed;
@@ -20,12 +21,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject shotgun;
     [SerializeField] private GameObject rifle;
     [SerializeField] private GameObject assaultRifle;
+    [SerializeField] private GameObject flamethrower;
 
+    private GameObject currentWeapon;
 
 
     //shooting
     [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private GameObject flamePrefab;
     [SerializeField] private float bulletSpeed;
+    [SerializeField] private float flameSpeed;
     private float lastFire;
     private float currentCooldown = 1;
 
@@ -33,12 +38,18 @@ public class PlayerController : MonoBehaviour
 
     private bool dpadInput = false;
 
+    public string SaveID { get; } = "player";
+
+    public JsonData SavedData { get; }
+
     void Start()
     {
         newRigidbody = GetComponent<Rigidbody2D>();
         myAnimator = gameObject.GetComponent<Animator>();
 
         slider.value = PlayerModel.CalculateHealth();
+
+        currentWeapon = pistol;
     }
 
     private void FixedUpdate()
@@ -70,10 +81,19 @@ public class PlayerController : MonoBehaviour
         var weapon = PlayerModel.SwitchWeapon((int)PlayerModel.SelectedWeapon);
         currentCooldown = weapon.GetWeaponCooldown();
 
+
         if (CanShoot(shootVertical, shootHorizontal) && Time.time > lastFire + currentCooldown)
         {
-            weapon.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
-            
+            Vector3 lookVec = new Vector3(shootHorizontal, shootVertical, 4096);
+            transform.rotation = Quaternion.LookRotation(lookVec, Vector3.back);
+            if ((int)PlayerModel.SelectedWeapon == 4)
+            {
+                weapon.Shoot(flamePrefab, transform, shootHorizontal, shootVertical);
+            }
+            else
+            {
+                weapon.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
+            }
             lastFire = Time.time;
         }
     }
@@ -127,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
     private bool CanShoot(float y, float x)
     {
-        if (((y < 1 && y > 0) || (y > -1 && y < 0)) && ((x < 1 && x > 0) || (x > -1 && x < 0)))
+        if (((y < 1 && y >= 0) || (y > -1 && y <= 0)) && ((x < 1 && x >= 0) || (x > -1 && x <= 0)))
             return false;
 
         return true;
@@ -138,16 +158,19 @@ public class PlayerController : MonoBehaviour
         switch ((int)PlayerModel.SelectedWeapon)
         {
             case 0:
-                StartCoroutine(ShowCurrentWeapon(pistol));
+                ShowCurrentWeapon(pistol);
                 break;
             case 1:
-                StartCoroutine(ShowCurrentWeapon(shotgun));
+                ShowCurrentWeapon(shotgun);
                 break;
             case 2:
-                StartCoroutine(ShowCurrentWeapon(rifle));
+                ShowCurrentWeapon(rifle);
                 break;
             case 3:
-                StartCoroutine(ShowCurrentWeapon(assaultRifle));
+                ShowCurrentWeapon(assaultRifle);
+                break;
+            case 4:
+                ShowCurrentWeapon(flamethrower);
                 break;
         }
     }
@@ -162,17 +185,21 @@ public class PlayerController : MonoBehaviour
         StopCoroutine(nameof(DpadControl));
     }
 
-    IEnumerator ShowCurrentWeapon(GameObject weapon)
+
+    private void ShowCurrentWeapon(GameObject weapon)
     {
         weapon.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        weapon.SetActive(false);
-
-        StopCoroutine(nameof(ShowCurrentWeapon));
+        currentWeapon.SetActive(false);
+        currentWeapon = weapon;
     }
 
     public void IsTalking(bool isTalking)
     {
         myAnimator.SetBool("isTalking", isTalking);
+    }
+
+    public void LoadFromData(JsonData data)
+    {
+        throw new System.NotImplementedException();
     }
 }

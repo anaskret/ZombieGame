@@ -4,42 +4,31 @@ using UnityEngine;
 
 public static class PlayerModel
 {
-    //Health
     public static float Health { get; private set; } = 10;
     public static float MaxHealth { get; private set; } = 10;
 
-    //cooldown after which player can receive damage
     public static float DamageCooldown { get; private set; } = 0;
 
-    //Weapons and their damage
     public static Weapons SelectedWeapon { get; private set; } = Weapons.Pistol;
     public static float Damage { get; private set; } = 1;
 
-    //save checkpoint
     public static GameObject CurrentCheckpoint { get; private set; }
     
-    //players coins
     public static int Coins { get; private set; } = 30;
 
-    //grenades
     public static int AvailableGrenades { get; private set; } = 1;
 
-    //first aid kits
     public static int AvailableFirstAidKits { get; private set; } = 1;
     public static float FirstAidKitRegeneration{ get; private set; } = 2;
 
-    //quests
     public static List<string> ActiveQuests { get; private set; } = new List<string>();
     public static List<string> CompletedQuests { get; private set; } = new List<string>();
 
-    //weapon changing
     private static int weaponIndex = 0;
     private static bool skip = true;
 
-    //weapon cooldown
     private static readonly float damageRate = 3;
 
-    //saves state of the players health and inventory when he reached the checkpoint
     private static float healthOnCheckpoint = 5;
     private static int grenadesOnCheckpoint = 1;
     private static int firstAidKitsOnCheckpoint = 1;
@@ -49,6 +38,7 @@ public static class PlayerModel
         Shotgun = 1,
         Rifle = 2,
         AssaultRifle = 3,
+        Flamethrower = 4
     };
 
     public static void SetDamageCooldown()
@@ -88,9 +78,9 @@ public static class PlayerModel
 
         if (weaponIndex < 0)
         {
-            weaponIndex = 3;
+            weaponIndex = 4;
         }
-        else if (weaponIndex > 3) //domyslnie 3
+        else if (weaponIndex > 4)
         {
             weaponIndex = 0;
         }
@@ -111,27 +101,31 @@ public static class PlayerModel
     
     public static IWeapon SwitchWeapon(int index)
     {
-        GameObject weaponInstance = new GameObject();
+        GameObject weaponInstance = GameObject.FindGameObjectWithTag("Weapons");
         switch (index)
         {
             case 0:
-                Pistol pistol = weaponInstance.AddComponent<Pistol>();
+                Pistol pistol = weaponInstance.GetComponent<Pistol>();
                 SelectedWeapon = Weapons.Pistol;
                 return pistol;
             case 1:
-                Shotgun shotgun= weaponInstance.AddComponent<Shotgun>();
+                Shotgun shotgun= weaponInstance.GetComponent<Shotgun>();
                 SelectedWeapon = Weapons.Shotgun;
                 return shotgun;
             case 2:
-                Rifle rifle = weaponInstance.AddComponent<Rifle>();
+                Rifle rifle = weaponInstance.GetComponent<Rifle>();
                 SelectedWeapon = Weapons.Rifle;
                 return rifle;
             case 3:
-                AssaultRifle ar = weaponInstance.AddComponent<AssaultRifle>();
+                AssaultRifle ar = weaponInstance.GetComponent<AssaultRifle>();
                 SelectedWeapon = Weapons.AssaultRifle;
                 return ar;
+            case 4:
+                Flamethrower flamethrower = weaponInstance.GetComponent<Flamethrower>();
+                SelectedWeapon = Weapons.Flamethrower;
+                return flamethrower;
             default:
-                Pistol defaultPistol = weaponInstance.AddComponent<Pistol>();
+                Pistol defaultPistol = weaponInstance.GetComponent<Pistol>();
                 SelectedWeapon = Weapons.Pistol;
                 return defaultPistol;
         }
