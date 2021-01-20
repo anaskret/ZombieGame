@@ -12,6 +12,14 @@ public class ShopController : MonoBehaviour
     [SerializeField] private int arPrice;
     [SerializeField] private Text arPriceText;
     [SerializeField] private GameObject ar;
+    
+    [SerializeField] private int shotgunPrice;
+    [SerializeField] private Text shotgunPriceText;
+    [SerializeField] private GameObject shotgun;
+    
+    [SerializeField] private int flamethrowerPrice;
+    [SerializeField] private Text flamethrowerPriceText;
+    [SerializeField] private GameObject flamethrower;
 
     [SerializeField] private int grenadePrice;
     [SerializeField] private Text grenadePriceText;
@@ -25,6 +33,8 @@ public class ShopController : MonoBehaviour
 
     private static bool isRifleBought = false;
     private static bool isARBought = false;
+    private static bool isShotgunBought = false;
+    private static bool isFlamethrowerBought = false;
     private GameObject player;
 
     private void Start()
@@ -34,6 +44,8 @@ public class ShopController : MonoBehaviour
 
         riflePriceText.text = $"Price: {riflePrice}";
         arPriceText.text = $"Price: {arPrice}";
+        shotgunPriceText.text = $"Price: {shotgunPrice}";
+        flamethrowerPriceText.text = $"Price: {flamethrowerPrice}";
         firstAidKitPriceText.text = $"Price: {firstAidKitPrice}";
         firstAidKitYouOwnText.text = $"Price: {PlayerModel.AvailableFirstAidKits}";
         grenadePriceText.text = $"Price: {grenadePrice}";
@@ -47,6 +59,10 @@ public class ShopController : MonoBehaviour
         firstAidKitYouOwnText.text = $"Price: {PlayerModel.AvailableFirstAidKits}";
         grenadeYouOwnText.text = $"Price: {PlayerModel.AvailableGrenades}";
 
+        if (isShotgunBought)
+        {
+            shotgun.SetActive(false);
+        }
         if (isRifleBought)
         {
             rifle.SetActive(false);
@@ -54,6 +70,10 @@ public class ShopController : MonoBehaviour
         if (isARBought)
         {
             ar.SetActive(false);
+        }
+        if (isFlamethrowerBought)
+        {
+            flamethrower.SetActive(false);
         }
     }
 
@@ -72,6 +92,19 @@ public class ShopController : MonoBehaviour
         PlayerModel.ChangeNumberOfGrenades(1);
         PlayerModel.ChangeNumberOfCoins(-grenadePrice);
     }
+
+    public void BuyShotgun()
+    {
+        if (PlayerModel.Coins < shotgunPrice || isShotgunBought)
+            return;
+
+        var gameObject = new GameObject();
+        Shotgun shotgun = gameObject.AddComponent<Shotgun>();
+        shotgun.Unlock();
+        isShotgunBought = true;
+        PlayerModel.ChangeNumberOfCoins(-shotgunPrice);
+    }
+
 
     public void BuyRifle()
     {
@@ -95,6 +128,17 @@ public class ShopController : MonoBehaviour
         ar.Unlock();
         isARBought = true;
         PlayerModel.ChangeNumberOfCoins(-arPrice);
+    }
+    public void BuyFlamethrower()
+    {
+        if (PlayerModel.Coins < flamethrowerPrice || isFlamethrowerBought)
+            return;
+
+        var gameObject = new GameObject();
+        Flamethrower rifle = gameObject.AddComponent<Flamethrower>();
+        rifle.Unlock();
+        isFlamethrowerBought= true;
+        PlayerModel.ChangeNumberOfCoins(-flamethrowerPrice);
     }
 
     public void EndTalking()

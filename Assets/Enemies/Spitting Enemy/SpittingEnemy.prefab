@@ -417,8 +417,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3771467789110660069}
   - component: {fileID: 737005322786646368}
-  - component: {fileID: 9213406790471607398}
   - component: {fileID: 8645488409718301350}
+  - component: {fileID: 9213406790471607398}
   - component: {fileID: 3407491408355632297}
   - component: {fileID: 3717454766324111814}
   m_Layer: 0
@@ -493,29 +493,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9213406790471607398
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8711432082879186405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e89abe9ca85a9a4ca96fd877449cbba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 2
-  health: 5
-  coinPrefab: {fileID: 2718800950734579799, guid: f1c295eb702fa8944a8294dd4fe5fc48,
-    type: 3}
-  healthBarUi: {fileID: 2004394624074161949}
-  slider: {fileID: 5705453338661296433}
-  bulletPrefab: {fileID: 1662737568839722627, guid: 74ff6848ca07799479f2c5a2800a38b7,
-    type: 3}
-  fireDelay: 2
-  p1: {fileID: 0}
-  p2: {fileID: 0}
 --- !u!95 &8645488409718301350
 Animator:
   serializedVersion: 3
@@ -535,6 +512,29 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &9213406790471607398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8711432082879186405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e89abe9ca85a9a4ca96fd877449cbba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 3
+  health: 5
+  coinPrefab: {fileID: 2718800950734579799, guid: f1c295eb702fa8944a8294dd4fe5fc48,
+    type: 3}
+  healthBarUi: {fileID: 2004394624074161949}
+  slider: {fileID: 5705453338661296433}
+  bulletPrefab: {fileID: 1662737568839722627, guid: 74ff6848ca07799479f2c5a2800a38b7,
+    type: 3}
+  fireDelay: 2.5
+  p1: {fileID: 0}
+  p2: {fileID: 0}
 --- !u!50 &3407491408355632297
 Rigidbody2D:
   serializedVersion: 4
@@ -545,7 +545,7 @@ Rigidbody2D:
   m_GameObject: {fileID: 8711432082879186405}
   m_BodyType: 1
   m_Simulated: 1
-  m_UseFullKinematicContacts: 0
+  m_UseFullKinematicContacts: 1
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0

@@ -55,9 +55,9 @@ public class EnemyModel : MonoBehaviour
 
         IsDead();
 
-        currentDistance = Vector3.Distance(player.transform.position, transform.position);
-        myAnimator.SetBool("isPlayerVisible", IsPlayerVisible());
+        currentDistance = Vector3.Distance(player.transform.position, gameObject.transform.position);
         myAnimator.SetFloat("distanceFromPlayer", currentDistance);
+        myAnimator.SetBool("isPlayerVisible", IsPlayerVisible());
     }
 
     protected virtual void OnCollisionEnter2D(Collision2D collision)
@@ -110,8 +110,6 @@ public class EnemyModel : MonoBehaviour
     {
         transform.position = new Vector3(startingX, startingY);
     }
-
-    protected bool debugg = false;
 
     protected bool IsPlayerVisible()
     {

@@ -44,6 +44,9 @@ public static class PlayerModel
     public static void SetDamageCooldown()
     {
         DamageCooldown = Time.time + damageRate;
+
+        var player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        player.startBlinking = true;
     }
 
     public static void ChangeHealth(float change)
@@ -63,6 +66,11 @@ public static class PlayerModel
         {
             Health = MaxHealth;
         }
+    }
+    
+    public static void LoadModel(float health)
+    {
+        Health = health;
     }
 
     public static void ChangeWeapon(int i)

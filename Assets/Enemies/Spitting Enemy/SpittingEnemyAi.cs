@@ -28,7 +28,6 @@ public class SpittingEnemyAi : EnemyModel
             pointB
         };
         currentTarget = 1;
-        debugg = true;
     }
 
     public void SetNextPoint()
@@ -58,7 +57,7 @@ public class SpittingEnemyAi : EnemyModel
     {
         if (Time.time > lastFire + fireDelay)
         {
-            _ = Instantiate(bulletPrefab, transform.position, transform.rotation);
+            Instantiate(bulletPrefab, transform.position, transform.rotation);
             lastFire = Time.time;
         }
     }

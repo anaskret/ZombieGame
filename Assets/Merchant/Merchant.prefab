@@ -437,6 +437,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14d341435073f684e8c98690174ca5e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 4311756455842933774}
+  background: {fileID: 6521917975908119076}
+  shopPrefab: {fileID: 3095464931065181192, guid: 393341d0a9a266747a297959b9d0e06c,
+    type: 3}
 --- !u!95 &1439271631366276605
 Animator:
   serializedVersion: 3

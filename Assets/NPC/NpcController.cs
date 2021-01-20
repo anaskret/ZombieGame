@@ -80,18 +80,18 @@ public class NpcController : MonoBehaviour
 
     public void IncrementIndexQuest()
     {
-        if (Input.GetKeyDown("joystick button 0") && index < dialogTextArray.Length)
+        if (Input.GetKeyDown("joystick button 0") && index+1 < dialogTextArray.Length)
         {
             index++;
         }
-        else if(Input.GetKeyDown("joystick button 0") && index == dialogTextArray.Length)
+        else if(Input.GetKeyDown("joystick button 0") && index+1 == dialogTextArray.Length)
         {
             //quest accepted
             HideTextField();
             questAccepted = true;
             gameObject.GetComponent<QuestController>().QuestAccepted();
         }
-        else if(Input.GetKeyDown("joystick button 1") && index == dialogTextArray.Length)
+        else if(Input.GetKeyDown("joystick button 1") && index+1 == dialogTextArray.Length)
         {
             //quest declined
             HideTextField();

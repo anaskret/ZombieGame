@@ -11,7 +11,7 @@ public class QuestController : MonoBehaviour
     private List<EnemyModel> enemyAiList = new List<EnemyModel>();
 
     private bool questAccepted = false;
-
+    private bool isAdded = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,25 +25,11 @@ public class QuestController : MonoBehaviour
         if (questAccepted)
         {
             EnemiesAlive();
-            Debug.Log(enemyAiList.Count);
             IsQuestCompleted();
         }
     }
 
-    public void QuestAccepted()
-    {
-        PlayerModel.AddActiveQuest(questName);
-        questAccepted = true;
-    }
-
-    private void IsQuestCompleted()
-    {
-        if (enemiesAlive <= 0)
-        { 
-            PlayerModel.QuestCompleted(questName);
-            gameObject.GetComponent<NpcController>().questCompleted = true;
-        }
-    }
+    
 
     private void GetEnemyAiComponents()
     {
@@ -87,6 +73,22 @@ public class QuestController : MonoBehaviour
                 enemiesAlive--;
                 enemyAiList.Remove(enemy);
             }
+        }
+    }
+    
+    public void QuestAccepted()
+    {
+        PlayerModel.AddActiveQuest(questName);
+        questAccepted = true;
+    }
+
+    private void IsQuestCompleted()
+    {
+        if (enemiesAlive <= 0 && !isAdded)
+        { 
+            PlayerModel.QuestCompleted(questName);
+            gameObject.GetComponent<NpcController>().questCompleted = true;
+            isAdded = true;
         }
     }
 }

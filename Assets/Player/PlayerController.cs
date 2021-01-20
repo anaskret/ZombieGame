@@ -4,6 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public class PlayerData
+{
+    public double PositionX { get; private set; }
+    public double PositionY { get; private set; }
+    public double Health { get; private set; }
+
+    public PlayerData(double positionX, double positionY, double health)
+    {
+        PositionX = positionX;
+        PositionY = positionY;
+        Health = health;
+    }
+    public PlayerData()
+    { }
+}
+
 public class PlayerController : MonoBehaviour, ISaveable
 {
     //movement
@@ -22,25 +38,50 @@ public class PlayerController : MonoBehaviour, ISaveable
     [SerializeField] private GameObject rifle;
     [SerializeField] private GameObject assaultRifle;
     [SerializeField] private GameObject flamethrower;
-
+    [SerializeField] private GameObject questScreenPrefab;
     private GameObject currentWeapon;
-
 
     //shooting
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private GameObject flamePrefab;
     [SerializeField] private float bulletSpeed;
     [SerializeField] private float flameSpeed;
+
+    [SerializeField] private GameObject pistolPoint;
+    [SerializeField] private GameObject shotgunPoint;
+    [SerializeField] private GameObject riflePoint;
+    [SerializeField] private GameObject arPoint;
+    [SerializeField] private GameObject flamethrowerPoint;
+
+    [SerializeField] private GameObject pistolModel;
+    [SerializeField] private GameObject shotgunModel;
+    [SerializeField] private GameObject rifleModel;
+    [SerializeField] private GameObject arModel;
+    [SerializeField] private GameObject flamethrowerModel;
+
+    private GameObject currentWeaponModel;
+
     private float lastFire;
     private float currentCooldown = 1;
 
     [SerializeField] private GameObject grenadePrefab;
 
+    [SerializeField] private Text ammo;
+
     private bool dpadInput = false;
 
     public string SaveID { get; } = "player";
 
-    public JsonData SavedData { get; }
+    private IWeapon weapon;
+
+    public JsonData SavedData { 
+        get
+        {
+            var data = new PlayerData(transform.position.x, transform.position.y, PlayerModel.Health);
+            var serizalizeData = JsonMapper.ToJson(data);
+            return serizalizeData;
+        }
+    }
 
     void Start()
     {
@@ -50,6 +91,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         slider.value = PlayerModel.CalculateHealth();
 
         currentWeapon = pistol;
+        currentWeaponModel = pistolModel;
+        weapon = PlayerModel.SwitchWeapon((int)PlayerModel.SelectedWeapon);
     }
 
     private void FixedUpdate()
@@ -58,9 +101,18 @@ public class PlayerController : MonoBehaviour, ISaveable
         numberOfCoins.text = PlayerModel.Coins.ToString();
         numberOfFirstAidKits.text = PlayerModel.AvailableFirstAidKits.ToString();
         numberOfGrenades.text = PlayerModel.AvailableGrenades.ToString();
+        ammo.text = $"Ammo: {weapon.GetWeaponAmmo()}";
+
+        OpenQuests();
+
+        if (startBlinking)
+        {
+            StartBlinking();
+        }
 
         if (PlayerModel.Health <= 0)
         {
+            /*SavingService.LoadGame("newCheckpoint.json");*/
             PlayerModel.ReloadCheckpoint(gameObject);
         }
     }
@@ -72,13 +124,13 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         newRigidbody.velocity = new Vector3(horizontal * speed, vertical * speed, 0);
     }
-
+    
     public void InitiateShooting()
     {
         float shootHorizontal = Input.GetAxis("ShootHorizontal");
         float shootVertical = Input.GetAxis("ShootVertical");
 
-        var weapon = PlayerModel.SwitchWeapon((int)PlayerModel.SelectedWeapon);
+        weapon = PlayerModel.SwitchWeapon((int)PlayerModel.SelectedWeapon);
         currentCooldown = weapon.GetWeaponCooldown();
 
 
@@ -86,13 +138,48 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             Vector3 lookVec = new Vector3(shootHorizontal, shootVertical, 4096);
             transform.rotation = Quaternion.LookRotation(lookVec, Vector3.back);
+
+            var gunPoint = GetGunPoint();
+
             if ((int)PlayerModel.SelectedWeapon == 4)
             {
-                weapon.Shoot(flamePrefab, transform, shootHorizontal, shootVertical);
+                GameObject flame = ObjectPool.SharedInstance.GetPooledFlameObject();
+
+                if (flame != null)
+                {
+                    SetUpBullet(flame, gunPoint);
+                    weapon.Shoot(flame, gunPoint.transform, shootHorizontal, shootVertical);
+                }
+            }
+            else if((int)PlayerModel.SelectedWeapon == 1)
+            {
+                GameObject bullet = ObjectPool.SharedInstance.GetPooledObject();
+                if (bullet == null)
+                    return;
+
+                SetUpBullet(bullet, gunPoint);
+                GameObject bullet2 = ObjectPool.SharedInstance.GetPooledObject();
+                if (bullet2 == null)
+                    return;
+                
+                SetUpBullet(bullet2, gunPoint);
+                GameObject bullet3 = ObjectPool.SharedInstance.GetPooledObject();
+                if (bullet3 == null)
+                    return;
+
+                SetUpBullet(bullet3, gunPoint);
+                
+                weapon.Shoot(bullet, bullet2, bullet3, gunPoint.transform, shootHorizontal, shootVertical);
+                
             }
             else
             {
-                weapon.Shoot(bulletPrefab, transform, shootHorizontal, shootVertical);
+                GameObject bullet = ObjectPool.SharedInstance.GetPooledObject();
+                if (bullet != null)
+                {
+                    SetUpBullet(bullet, gunPoint);
+                    weapon.Shoot(bullet, gunPoint.transform, shootHorizontal, shootVertical);
+                }
             }
             lastFire = Time.time;
         }
@@ -112,6 +199,13 @@ public class PlayerController : MonoBehaviour, ISaveable
         grenadeController.ThrowGrenade(horizontal, vertical);
 
         PlayerModel.ChangeNumberOfGrenades(-1);
+    }
+
+    public void LoadFromData(JsonData data)
+    {
+        var playerObject = JsonMapper.ToObject<PlayerData>(data.ToJson());
+        transform.position = new Vector3((float)playerObject.PositionX, (float)playerObject.PositionY);
+        PlayerModel.LoadModel((float)playerObject.Health);
     }
 
     public void UseFirstAidKit()
@@ -172,6 +266,9 @@ public class PlayerController : MonoBehaviour, ISaveable
             case 4:
                 ShowCurrentWeapon(flamethrower);
                 break;
+            default:
+                ShowCurrentWeapon(pistol);
+                break;
         }
     }
 
@@ -185,11 +282,49 @@ public class PlayerController : MonoBehaviour, ISaveable
         StopCoroutine(nameof(DpadControl));
     }
 
+    public float spriteBlinkingTimer = 0.0f;
+    public float spriteBlinkingMiniDuration = 0.1f;
+    public float spriteBlinkingTotalTimer = 0.0f;
+    public float spriteBlinkingTotalDuration = 3.0f;
+    [HideInInspector]
+    public bool startBlinking = false;
+
+    public void StartBlinking()
+    {
+        spriteBlinkingTotalTimer += Time.deltaTime;
+        if (spriteBlinkingTotalTimer >= spriteBlinkingTotalDuration)
+        {
+            startBlinking = false;
+            spriteBlinkingTotalTimer = 0.0f;
+            gameObject.GetComponent<SpriteRenderer>().enabled = true;
+            return;
+        }
+
+        spriteBlinkingTimer += Time.deltaTime;
+        if (spriteBlinkingTimer >= spriteBlinkingMiniDuration)
+        {
+            spriteBlinkingTimer = 0.0f;
+            if (gameObject.GetComponent<SpriteRenderer>().enabled == true)
+            {
+                gameObject.GetComponent<SpriteRenderer>().enabled = false;
+            }
+            else
+            {
+                gameObject.GetComponent<SpriteRenderer>().enabled = true;
+            }
+        }
+    }
 
     private void ShowCurrentWeapon(GameObject weapon)
     {
-        weapon.SetActive(true);
+        currentWeaponModel.SetActive(false);
         currentWeapon.SetActive(false);
+
+        weapon.SetActive(true);
+        var weaponModel = GetWeaponModel();
+        weaponModel.SetActive(true);
+
+        currentWeaponModel = weaponModel;
         currentWeapon = weapon;
     }
 
@@ -198,8 +333,46 @@ public class PlayerController : MonoBehaviour, ISaveable
         myAnimator.SetBool("isTalking", isTalking);
     }
 
-    public void LoadFromData(JsonData data)
+    private GameObject GetGunPoint()
     {
-        throw new System.NotImplementedException();
+        int index = (int)PlayerModel.SelectedWeapon;
+        switch (index)
+        {
+            case 0: return pistolPoint;
+            case 1: return shotgunPoint;
+            case 2: return riflePoint;
+            case 3: return arPoint;
+            case 4: return flamethrowerPoint;
+            default: return pistolPoint;
+        }
+    }
+
+    private GameObject GetWeaponModel()
+    {
+        int index = (int)PlayerModel.SelectedWeapon;
+        switch (index)
+        {
+            case 0: return pistolModel;
+            case 1: return shotgunModel;
+            case 2: return rifleModel;
+            case 3: return arModel;
+            case 4: return flamethrowerModel;
+            default: return pistolModel;
+        }
+    }
+
+    private void SetUpBullet(GameObject bullet, GameObject gunPoint)
+    {
+        bullet.transform.position = gunPoint.transform.position;
+        bullet.transform.rotation = gunPoint.transform.rotation;
+        bullet.SetActive(true);
+    }
+
+    private void OpenQuests()
+    {
+        if (Input.GetKeyDown("joystick button 6")) 
+        {
+            Instantiate(questScreenPrefab);
+        }
     }
 }

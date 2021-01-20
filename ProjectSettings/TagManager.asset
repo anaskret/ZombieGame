@@ -12,6 +12,7 @@ TagManager:
   - Wall
   - Bullet
   - Weapons
+  - Boss
   layers:
   - Default
   - TransparentFX

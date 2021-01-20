@@ -17,11 +17,11 @@ public class PlayerBehaviour : StateMachineBehaviour
         player.Movement();
         player.InitiateShooting();
         player.WeaponSelect();
-        if(Input.GetKeyDown("joystick button 2"))
+        if(Input.GetKeyDown("joystick button 1"))
         {
             player.InitiateGrenadeThrow();
         }
-        if(Input.GetKeyDown("joystick button 3"))
+        if(Input.GetKeyDown("joystick button 2"))
         {
             player.UseFirstAidKit();
         }
